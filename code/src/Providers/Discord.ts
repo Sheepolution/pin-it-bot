@@ -42,6 +42,8 @@ export default class Discord {
             return;
         }
 
+        this.client.user?.setActivity('pin!help')
+
         this.eventReadyCallback();
     }
 
