@@ -16,7 +16,7 @@ Add the channel where this command is used to the list of channels where the bot
 
 `pin!remove`
 
-Add the channel where this command is used to the list of channels where the bot is active.
+Remove the channel where this command is used from the list of channels where the bot is active.
 
 ## Hosting the bot
 
