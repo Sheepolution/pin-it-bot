@@ -94,7 +94,7 @@ export default class DiscordService {
     }
 
     public static IsMemberAdmin(member: GuildMember) {
-        return member.hasPermission('ADMINISTRATOR');
+        return member.hasPermission('MANAGE_CHANNELS') || member.hasPermission('MANAGE_MESSAGES');
     }
 
     public static async SendEmbed(channel: Channel, embed: MessageEmbed, content?: string) {
