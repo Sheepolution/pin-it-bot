@@ -12,6 +12,7 @@ export default class AdminHandler {
 
         switch (messageInfo.commandInfo.commands) {
             case commands.HELP:
+            case commands.COMMANDS:
                 this.OnHelp(messageInfo, guild);
                 break;
             case commands.DEVELOPER:
