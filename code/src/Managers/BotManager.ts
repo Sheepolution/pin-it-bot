@@ -10,6 +10,7 @@ import CacheManager from './CacheManager';
 import MessageHandler from '../Handlers/MessageHandler';
 import SettingsConstants from '../Constants/SettingsConstants';
 import ReactionManager from './ReactionManager';
+import Discord from '../Providers/Discord';
 
 export default class BotManager {
 
@@ -18,6 +19,7 @@ export default class BotManager {
     public static OnReady() {
         console.log(`${SettingsConstants.BOT_NAME}: Connected`);
         CacheManager.CreateTimeoutInterval();
+        Discord.GetClient().user.setActivity(`${SettingsConstants.DEFAULT_PREFIX}help`, { type: 'WATCHING' });
     }
 
     public static async OnMessage(message: Message) {

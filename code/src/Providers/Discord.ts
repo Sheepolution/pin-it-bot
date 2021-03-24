@@ -1,5 +1,4 @@
 import { Client, Guild, Message, MessageReaction, User } from 'discord.js';
-import SettingsConstants from '../Constants/SettingsConstants';
 import DiscordService from '../Services/DiscordService';
 
 export default class Discord {
@@ -53,8 +52,6 @@ export default class Discord {
         if (this.eventReadyCallback == null) {
             return;
         }
-
-        this.client.user?.setActivity(`${SettingsConstants.DEFAULT_PREFIX}help`);
 
         this.eventReadyCallback();
     }
