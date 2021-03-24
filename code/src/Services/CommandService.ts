@@ -1,12 +1,14 @@
-import SettingsConstants from '../Constants/SettingsConstants';
+import Guild from '../Objects/Guild';
 
 export default class CommandService {
 
-    public static GetCommandString(command: string, args?: Array<string>) {
-        var str = `\`${SettingsConstants.DEFAULT_PREFIX}${command}`;
+    public static GetCommandString(guild?: Guild, command?: string, args?: Array<string>, asValues?: boolean) {
+        if (command == null) { return ''; }
+
+        var str = `\`${guild?.GetPrefix()}${command}`;
         if (args != null) {
             for (const arg of args) {
-                str += ` [${arg}]`;
+                str += asValues ? ` ${arg}` : ` [${arg}]`;
             }
         }
 

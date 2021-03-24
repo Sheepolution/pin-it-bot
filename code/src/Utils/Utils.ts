@@ -1,4 +1,6 @@
 /* eslint-disable no-inner-declarations */
+const uuidv4 = require('uuid/v4');
+
 export module Utils {
 
     export function Is(a: any, ...b: any) {
@@ -40,6 +42,10 @@ export module Utils {
         return int != 0;
     }
 
+    export function UUID() {
+        return uuidv4();
+    }
+
     export function ObjectToArray(obj: any) {
         var arr = [];
         for (const key in obj) {
@@ -67,7 +73,7 @@ export module Utils {
 
     export function ConvertDateToUtc(date: Date) {
         if (date == null) {
-            return undefined;
+            return null;
         }
 
         if (date.getUTCDate == null) {
@@ -86,6 +92,10 @@ export module Utils {
     }
 
     export function GetDateAsString(date: Date) {
+        if (date == null || date.toISOString == null) {
+            return null;
+        }
+
         return date.toISOString();
     }
 
@@ -99,12 +109,11 @@ export module Utils {
 
     export function GetSecondsInMinutesAndSeconds(n: number) {
         const f = Math.floor(n / 60);
-        const minutes = f > 0 ? (`${f} ${f == 1 ? 'minuut' : 'minuten'}`) : null;
-        if (minutes == null) {
-            return (n / 60 != f) ? `${(n - (f) * 60)} seconden` : '';
+        if (f == 0) {
+            return `${n} seconds`;
         }
 
-        return `${f} ${f == 1 ? 'minuut' : 'minuten'}${(n / 60 != f) ? ` en ${(n - (f) * 60)} seconden` : ''}`;
+        return `${f} ${f == 1 ? 'minute' : 'minutes'}${(n / 60 != f) ? ` and ${(n - (f) * 60)} seconds` : ''}`;
     }
 
     export function GetMinutesInSeconds(n: number) {
@@ -115,8 +124,16 @@ export module Utils {
         return n * 60 * 60;
     }
 
+    export function GetSecondsInHours(n: number) {
+        return n * 60 * 60;
+    }
+
     export function GetMinutesInMiliSeconds(n: number) {
         return n * 60 * 1000;
+    }
+
+    export function GetSecondsInMiliSeconds(n: number) {
+        return n * 1000;
     }
 
     export function GetHoursInMiliSeconds(n: number) {

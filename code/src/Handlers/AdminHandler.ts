@@ -1,43 +1,134 @@
 import CommandConstants from '../Constants/CommandConstants';
-import RedisConstants from '../Constants/RedisConstants';
+import SettingsConstants from '../Constants/SettingsConstants';
 import AdminEmbeds from '../Embeds/AdminEmbeds';
-import ICommandInfo from '../Interfaces/ICommandInfo';
+import { LogType } from '../Enums/LogType';
 import IMessageInfo from '../Interfaces/IMessageInfo';
-import { Redis } from '../Providers/Redis';
+import BotManager from '../Managers/BotManager';
+import CommandManager from '../Managers/CommandManager';
+import Guild from '../Objects/Guild';
+import ChannelRepository from '../Repositories/ChannelRepository';
+import CommandService from '../Services/CommandService';
+import DiscordService from '../Services/DiscordService';
+import LogService from '../Services/LogService';
 import MessageService from '../Services/MessageService';
 
 export default class AdminHandler {
 
-    private static readonly channelPrefix = RedisConstants.REDIS_KEY + RedisConstants.CHANNEL_KEY;
+    public static OnCommand(messageInfo: IMessageInfo, guild: Guild) {
+        const commands = CommandConstants.COMMANDS;
+        const commandInfo = messageInfo.commandInfo;
 
-    public static async OnCommand(messageInfo: IMessageInfo, commandInfo: ICommandInfo) {
-        const commands = CommandConstants.ADMIN;
-        const command = commandInfo.command;
-
-        if (commands.HELP.includes(command)) {
-            this.OnHelp(messageInfo);
-        } else if (commands.ADD.includes(command)) {
-            this.OnAdd(messageInfo);
-        } else if (commands.REMOVE.includes(command)) {
-            this.OnRemove(messageInfo);
-        } else {
-            return false;
+        switch (commandInfo.commands) {
+            case commands.HELP:
+                this.OnHelp(messageInfo, guild);
+                break;
+            case commands.GUIDE:
+                this.OnGuide(messageInfo, guild);
+                break;
+            case commands.COMMANDS:
+                this.OnCommands(messageInfo, guild);
+                break;
+            case commands.PREFIX:
+                this.OnPrefix(messageInfo, guild, commandInfo.args[0]);
+                break;
+            case commands.CHANNEL:
+                this.OnChannel(messageInfo, guild, commandInfo.args[0]);
+                break;
+            case commands.ROLE:
+                this.OnRole(messageInfo, guild, commandInfo.args[0]);
+                break;
+            default: return false;
         }
 
         return true;
     }
 
-    private static async OnHelp(messageInfo: IMessageInfo) {
-        MessageService.ReplyEmbed(messageInfo, AdminEmbeds.GetHelpEmbed());
+    private static OnHelp(messageInfo: IMessageInfo, guild: Guild) {
+        MessageService.ReplyEmbed(messageInfo, AdminEmbeds.GetHelpEmbed(guild));
+        CommandManager.SetCooldown(messageInfo, 10);
     }
 
-    private static async OnAdd(messageInfo: IMessageInfo) {
-        Redis.set(`${this.channelPrefix}${messageInfo.channel.id}`, 1);
-        MessageService.ReplyMessage(messageInfo, 'The bot will now allow people to pin messages with attachments in this channel.', true, true);
+    private static OnGuide(messageInfo: IMessageInfo, guild: Guild) {
+        MessageService.ReplyEmbed(messageInfo, AdminEmbeds.GetGuideEmbed(guild));
+        CommandManager.SetCooldown(messageInfo, 10);
     }
 
-    private static async OnRemove(messageInfo: IMessageInfo) {
-        Redis.del(`${this.channelPrefix}${messageInfo.channel.id}`);
-        MessageService.ReplyMessage(messageInfo, 'The bot will not allow message to be pinned in this channel anymore.', true, true);
+    private static OnCommands(messageInfo: IMessageInfo, guild: Guild) {
+        MessageService.ReplyEmbed(messageInfo, AdminEmbeds.GetCommandsEmbed(guild));
+        CommandManager.SetCooldown(messageInfo, 10);
     }
+
+    private static OnPrefix(messageInfo: IMessageInfo, guild: Guild, prefix: string) {
+        if (!prefix?.isFilled()) {
+            MessageService.ReplyMessage(messageInfo, 'Use this command to set the prefix for the commands.');
+            return;
+        }
+
+        const maxLength = SettingsConstants.MAX_PREFIX_LENGTH;
+        if (prefix.length > maxLength) {
+            MessageService.ReplyMessage(messageInfo, `The prefix can't be longer than ${maxLength} characters.`, false, true);
+            return;
+        }
+
+        guild.SetPrefix(prefix);
+
+        BotManager.ClearPrefixCache(messageInfo);
+        MessageService.ReplyMessage(messageInfo, `The prefix is now set to ${prefix}`, true, true);
+        CommandManager.SetCooldown(messageInfo, 10);
+    }
+
+    private static async OnChannel(messageInfo: IMessageInfo, guild: Guild, action: string) {
+        if (!action?.isFilled() || action.trim().toLowerCase() == 'add') {
+            var channel = await ChannelRepository.GetByDiscordId(messageInfo.channel.id);
+            if (channel != null) {
+                MessageService.ReplyMessage(messageInfo, 'This channel was already added.', undefined, true);
+            } else {
+                ChannelRepository.New(messageInfo.channel.id, guild);
+                MessageService.ReplyMessage(messageInfo, 'Members can now pin their messages with attachments in this channel.', true, true);
+                LogService.Log(LogType.ChannelAdded, guild);
+            }
+        } else if (action == 'remove') {
+            var channel = await ChannelRepository.GetByDiscordId(messageInfo.channel.id);
+            if (channel != null) {
+                ChannelRepository.Delete(channel);
+                MessageService.ReplyMessage(messageInfo, 'This channel has been removed.', true, true);
+                LogService.Log(LogType.ChannelRemoved, guild);
+            } else {
+                MessageService.ReplyMessage(messageInfo, 'This channel was not on the list already.', undefined, true);
+            }
+        } else {
+            MessageService.ReplyMessage(messageInfo, `Use ${CommandService.GetCommandString(guild, CommandConstants.COMMANDS.CHANNEL[0], ['add/remove'], true)} to add or remove the channel as channel where members are allowed to pin their messages with attachments.`, false, true);
+            return;
+        }
+
+        CommandManager.SetCooldown(messageInfo, 10);
+    }
+
+    private static async OnRole(messageInfo: IMessageInfo, guild: Guild, permission: string) {
+        if (!permission?.isFilled(true)) {
+            MessageService.ReplyMessage(messageInfo, `Set which role is required to be allowed to pin your messages with attachments. If you want no role to be required use ${CommandService.GetCommandString(guild, CommandConstants.COMMANDS.ROLE[0], ['everyone'], true)}.`, undefined, true);
+            CommandManager.SetCooldown(messageInfo, 5);
+            return;
+        }
+
+        permission = permission.trim().toLowerCase();
+
+        if (permission == 'everyone') {
+            await guild.SetRoleId(null);
+            MessageService.ReplyMessage(messageInfo, 'All members are now allowed to pin their messages with attachments.', true, true);
+        } else {
+            const role = await DiscordService.FindRole(permission, messageInfo.guild);
+            if (role == null) {
+                MessageService.ReplyMessage(messageInfo, `I can't find a role with the name ${permission}.`, false, true);
+                CommandManager.SetCooldown(messageInfo, 3);
+                return;
+            }
+
+            await guild.SetRoleId(role.id);
+            MessageService.ReplyMessage(messageInfo, `Only members with the role ${role.name} are now allowed to pin their messages with attachments.`, true, true);
+        }
+
+        CommandManager.SetCooldown(messageInfo, 10);
+    }
+
 }

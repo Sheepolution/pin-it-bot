@@ -1,4 +1,5 @@
-import { Client, Message, MessageReaction, User } from 'discord.js';
+import { Client, Guild, Message, MessageReaction, User } from 'discord.js';
+import SettingsConstants from '../Constants/SettingsConstants';
 import DiscordService from '../Services/DiscordService';
 
 export default class Discord {
@@ -8,7 +9,8 @@ export default class Discord {
     public static eventReadyCallback: Function;
     public static eventMessageCallback: Function;
     public static eventReactionAddCallback: Function;
-    public static eventReactionRemoveCallback: Function;
+    public static eventGuildCreate: Function;
+    public static eventGuildDelete: Function;
 
     public static SetEventReadyCallback(callback: Function) {
         this.eventReadyCallback = callback;
@@ -22,14 +24,24 @@ export default class Discord {
         this.eventReactionAddCallback = callback;
     }
 
+    public static SetEventGuildCreateCallback(callback: Function) {
+        this.eventGuildCreate = callback;
+    }
+
+    public static SetEventGuildDeleteCallback(callback: Function) {
+        this.eventGuildDelete = callback;
+    }
+
     public static Init() {
         this.client = new Client({ partials: ['MESSAGE', 'REACTION'] });
 
-        DiscordService.SetClient(this.client)
+        DiscordService.SetClient(this.client);
 
-        this.client.on('ready', async () => { await Discord.EventReady() });
-        this.client.on('message', async (message) => { await Discord.EventMessage(message) });
-        this.client.on('messageReactionAdd', async (reaction, user) => { await Discord.EventReactionAdd(reaction, <User>user) });
+        this.client.once('ready', () => { Discord.EventReady(); });
+        this.client.on('message', (message) => { Discord.EventMessage(message); });
+        this.client.on('messageReactionAdd', async (reaction, user) => { await Discord.EventReactionAdd(reaction, <User>user); });
+        this.client.on('guildCreate', (guild) => { Discord.EventGuildCreate(guild); });
+        this.client.on('guildDelete', (guild) => { Discord.EventGuildDelete(guild); });
         this.client.login(process.env.TOKEN);
     }
 
@@ -37,17 +49,17 @@ export default class Discord {
         return this.client;
     }
 
-    private static async EventReady() {
+    private static EventReady() {
         if (this.eventReadyCallback == null) {
             return;
         }
 
-        this.client.user?.setActivity('pin!help')
+        this.client.user?.setActivity(`${SettingsConstants.DEFAULT_PREFIX}help`);
 
         this.eventReadyCallback();
     }
 
-    private static async EventMessage(message: Message) {
+    private static EventMessage(message: Message) {
         if (this.eventMessageCallback == null) {
             return;
         }
@@ -59,11 +71,27 @@ export default class Discord {
         this.eventMessageCallback(message);
     }
 
-    private static async EventReactionAdd(reaction: MessageReaction, user: User) {
+    private static EventReactionAdd(reaction: MessageReaction, user: User) {
         if (user.bot) {
             return;
         }
 
         this.eventReactionAddCallback(reaction, user);
+    }
+
+    private static EventGuildCreate(guild: Guild) {
+        if (this.eventMessageCallback == null) {
+            return;
+        }
+
+        this.eventGuildCreate(guild);
+    }
+
+    private static EventGuildDelete(guild: Guild) {
+        if (this.eventMessageCallback == null) {
+            return;
+        }
+
+        this.eventGuildDelete(guild);
     }
 }

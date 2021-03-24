@@ -1,7 +1,6 @@
 import { Message, User } from 'discord.js';
 import IMessageInfo from '../Interfaces/IMessageInfo';
 import RegexConstants from '../Constants/RegexConstants';
-import ICommandInfo from '../Interfaces/ICommandInfo';
 
 export default class DiscordUtils {
 
@@ -33,36 +32,25 @@ export default class DiscordUtils {
         return null;
     }
 
+    public static GetRoleId(id: string) {
+        if (this.IsId(id)) { return id; }
+
+        var match = id.match(RegexConstants.ROLE);
+
+        if (match) {
+            return match[1];
+        }
+
+        return null;
+    }
+
     public static ParseMessageToInfo(message: Message, user: User) {
         const info: IMessageInfo = {
             user: user,
+            member: message.member,
             channel: message.channel,
             message: message,
-            guild: message.guild || undefined,
-            member: message.member || undefined,
-        };
-
-        return info;
-    }
-
-    public static ParseContentToCommand(content: string, prefix: string) {
-        const words = content.split(' ');
-        var command = words[0].substr(prefix.length).toLowerCase();
-        if (command.includes('\n')) {
-            const commandSplit = words[0].substr(prefix.length).split('\n');
-            command = commandSplit[0].toLowerCase();
-
-            content = content.replace('\n', ' ');
-
-            words.shift();
-            words.unshift(commandSplit[1]);
-            words.unshift(command);
-        }
-
-        const info: ICommandInfo = {
-            command: command,
-            args: words,
-            content: content,
+            guild: message.guild || null,
         };
 
         return info;

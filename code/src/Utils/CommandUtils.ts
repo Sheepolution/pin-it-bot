@@ -1,4 +1,37 @@
+import ICommandInfo from '../Interfaces/ICommandInfo';
+
 export default class CommandUtils {
+
+    public static ParseContentToCommand(content: string, prefix: string) {
+        const words = content.replace(/\s+/g, ' ').split(' ');
+        var command = words[0].substr(prefix.length).toLowerCase();
+        if (command.includes('\n')) {
+            const commandSplit = words[0].substr(prefix.length).split('\n');
+            command = commandSplit[0].toLowerCase();
+
+            content = content.replace('\n', ' ');
+
+            words.shift();
+            words.unshift(commandSplit[1]);
+        } else {
+            words.shift();
+        }
+
+        if (content.trim().includes(' ')) {
+            content = content.slice(content.indexOf(' ')).trim();
+        } else {
+            content = '';
+        }
+
+        const info: ICommandInfo = {
+            command: command,
+            commands: [],
+            args: words,
+            content: content,
+        };
+
+        return info;
+    }
 
     public static GetCommaArgs(content: string) {
         const commaArgs = content.split(',');
@@ -42,7 +75,6 @@ export default class CommandUtils {
         return obj;
     }
 
-    // TODO: DRY???
     public static GetSingleNumberedArgument(content: string) {
         const obj: any = {};
 

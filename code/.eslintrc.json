@@ -21,31 +21,113 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "no-multiple-empty-lines": ["error",{"max": 1}],
-        "keyword-spacing": "error",
-        "indent": ["error", 4, { "SwitchCase": 1 }],
-        "linebreak-style": ["error", "windows"],
-        "quotes": ["error", "single"],
-        "class-methods-use-this":"error",
-        "consistent-this": ["error", "that"],
-        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-        "comma-dangle": ["error", "only-multiline"],
+        "require-await": "off",
+        "semi": "off",
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 1
+            }
+        ],
+        "keyword-spacing": "off",
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "class-methods-use-this": "error",
+        "consistent-this": [
+            "error",
+            "that"
+        ],
+        "brace-style": [
+            "error",
+            "1tbs",
+            {
+                "allowSingleLine": true
+            }
+        ],
+        "comma-dangle": [
+            "error",
+            "only-multiline"
+        ],
         "no-unused-vars": "error",
-        "curly": ["error", "all"],
+        "curly": [
+            "error",
+            "all"
+        ],
         "no-useless-constructor": "error",
         "no-trailing-spaces": "error",
         "no-restricted-globals": "error",
-        "array-bracket-newline": ["error", "consistent"],
+        "array-bracket-newline": [
+            "error",
+            "consistent"
+        ],
+        "@typescript-eslint/type-annotation-spacing": [
+            "error",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "@typescript-eslint/semi": "error",
         "@typescript-eslint/no-unused-vars": "error",
+        "@typescript-eslint/require-await": "error",
         "@typescript-eslint/member-ordering": "error",
         "@typescript-eslint/naming-convention": [
             "error",
-            { "selector": "function", "format": ["PascalCase"] },
-            { "selector": "property", "format": ["camelCase", "snake_case", "PascalCase", "UPPER_CASE"] },
-            { "selector": "variable", "format": ["camelCase", "UPPER_CASE", "PascalCase"] },
-            { "selector": "typeLike", "format": ["PascalCase"] },
-            { "selector": "method", "format": ["PascalCase", "UPPER_CASE"] },
-            { "selector": "enum", "format": ["PascalCase"] }
+            {
+                "selector": "function",
+                "format": [
+                    "PascalCase"
+                ]
+            },
+            {
+                "selector": "property",
+                "format": [
+                    "camelCase",
+                    "snake_case",
+                    "PascalCase",
+                    "UPPER_CASE"
+                ]
+            },
+            {
+                "selector": "variable",
+                "format": [
+                    "camelCase",
+                    "UPPER_CASE",
+                    "PascalCase"
+                ]
+            },
+            {
+                "selector": "typeLike",
+                "format": [
+                    "PascalCase"
+                ]
+            },
+            {
+                "selector": "method",
+                "format": [
+                    "PascalCase",
+                    "UPPER_CASE"
+                ]
+            },
+            {
+                "selector": "enum",
+                "format": [
+                    "PascalCase"
+                ]
+            }
         ]
     }
 }

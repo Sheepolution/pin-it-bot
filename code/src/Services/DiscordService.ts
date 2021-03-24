@@ -1,6 +1,5 @@
 import { Channel, Client, Guild, GuildMember, MessageEmbed, TextChannel, User } from 'discord.js';
 import DiscordUtils from '../Utils/DiscordUtils';
-import { Utils } from '../Utils/Utils';
 
 export default class DiscordService {
 
@@ -45,7 +44,7 @@ export default class DiscordService {
             // Guild has already been fetched in FindChannelById
             return guild.channels.cache.find(channel => channel.name.toLowerCase() == channelId.toLowerCase());
         }
-        return undefined;
+        return null;
     }
 
     public static async FindChannelById(searchKey: string, guild?: Guild) {
@@ -68,25 +67,46 @@ export default class DiscordService {
         }
     }
 
-    public static async FindRoleById(roleId: string, guild: Guild) {
-        var foundRole;
-        foundRole = guild.roles.cache.get(roleId);
-        if (!foundRole) {
-            await guild.fetch();
-            foundRole = guild.roles.cache.get(roleId);
-        }
-
-        if (foundRole != null) {
+    public static async FindRole(searchKey: string, guild: Guild) {
+        const foundRole = await this.FindRoleById(searchKey, guild);
+        if (foundRole) {
             return foundRole;
         }
+
+        await guild.roles.fetch();
+
+        const lowerRole = searchKey.toLowerCase();
+        return guild.roles.cache.find(role => role.name.toLowerCase() == lowerRole);
+    }
+
+    public static async FindRoleById(searchKey: string, guild: Guild) {
+        const id = DiscordUtils.GetRoleId(searchKey);
+        if (id) {
+            const foundRole = guild.roles.cache.get(id) || guild.roles.fetch(id);
+            if (foundRole != null) {
+                return foundRole;
+            }
+        }
+    }
+
+    public static async CreateRole(data: any, guild: Guild) {
+        return guild.roles.create({ data: data });
     }
 
     public static async FindMessageById(messageId: string, channel: TextChannel) {
-        return await channel.messages.fetch(messageId);
+        try {
+            return await channel.messages.fetch(messageId);
+        } catch (error) {
+            return null;
+        }
     }
 
     public static async FindUserById(userId: string) {
-        return this.client.users.cache.get(userId) || await this.client.users.fetch(userId);
+        try {
+            return this.client.users.cache.get(userId) || await this.client.users.fetch(userId);
+        } catch (error) {
+            return null;
+        }
     }
 
     public static FindGuildById(guildId: string) {
@@ -94,25 +114,32 @@ export default class DiscordService {
     }
 
     public static IsMemberAdmin(member: GuildMember) {
-        return member.hasPermission('MANAGE_CHANNELS') || member.hasPermission('MANAGE_MESSAGES');
+        return member.hasPermission('ADMINISTRATOR');
+    }
+
+    public static IsMemberMod(member: GuildMember) {
+        return member.hasPermission('MANAGE_CHANNELS') || member.hasPermission('MANAGE_MESSAGES') || member.hasPermission('MANAGE_ROLES');
     }
 
     public static async SendEmbed(channel: Channel, embed: MessageEmbed, content?: string) {
-        const textChannel: TextChannel = <TextChannel>channel;
-        return await (content ? textChannel.send(content, embed) : textChannel.send(embed))
+        try {
+            const textChannel: TextChannel = <TextChannel>channel;
+            return await (content ? textChannel.send(content, embed) : textChannel.send(embed));
+        } catch (error) {
+            // Was not able to send message.
+        }
     }
 
     public static async SendMessage(channel: Channel, message: string, embed?: MessageEmbed) {
         try {
             const textChannel: TextChannel = <TextChannel>channel;
             if (embed) {
-                return await this.SendEmbed(textChannel, embed, message)
+                return await this.SendEmbed(textChannel, embed, message);
             }
 
             return await textChannel.send(message);
         } catch (error) {
             // Was not able to send message.
-            console.log(`(${Utils.GetNowString()}) ${error}`);
         }
     }
 
@@ -121,13 +148,12 @@ export default class DiscordService {
             const reply = `<@${user}> ${message}`;
 
             if (embed) {
-                return await this.SendEmbed(textChannel, embed, reply)
+                return await this.SendEmbed(textChannel, embed, reply);
             }
 
             return await textChannel.send(reply);
         } catch (error) {
             // Was not able to send message.
-            console.log(`(${Utils.GetNowString()}) ${error}`);
         }
     }
 }

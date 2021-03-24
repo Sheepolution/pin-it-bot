@@ -1,10 +1,14 @@
+interface Function {
+    readonly name: string;
+}
+
 interface String {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     toTitleCase(keep?: boolean): string;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     replaceAll(search: string, replacement: string): string;
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    isFilled(): boolean;
+    isFilled(trim?: boolean): boolean;
 }
 
 interface Array<T> {
@@ -12,6 +16,14 @@ interface Array<T> {
     randomChoice(): T;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     shuffle(): T;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    equals(array: Array<T>): boolean;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    filter(test: Array<T>): boolean;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    asyncFilter(filterFn: any): Promise<any>
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    asyncFind(filterFn: any): Promise<T>
 }
 
 String.prototype.toTitleCase = function (keep?: boolean) {
@@ -25,7 +37,11 @@ String.prototype.replaceAll = function (search: string, replacement: string) {
     return this.replace(new RegExp(search, 'g'), replacement);
 };
 
-String.prototype.isFilled = function () {
+String.prototype.isFilled = function (trim?: boolean) {
+    if (trim) {
+        return this.trim().length > 0;
+    }
+
     return this.length > 0;
 };
 
@@ -43,4 +59,34 @@ Array.prototype.shuffle = function () {
     }
 
     return this;
-}
+};
+
+Array.prototype.equals = function (array: Array<any>) {
+    if (this === array) {
+        return true;
+    }
+
+    if (this.length !== array.length) {
+        return false;
+    }
+
+    for (let i = 0; i < this.length; i++) {
+        if (this[i] !== array[i]) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+Array.prototype.asyncFilter = async function (f) {
+    var booleans = await Promise.all(this.map(f));
+    return this.filter((x, i) => booleans[i]);
+};
+
+Array.prototype.asyncFind = async function <T>(asyncCallback: any) {
+    const promises = this.map(asyncCallback);
+    const results = await Promise.all(promises);
+    const index = results.findIndex(result => result);
+    return <T>this[index];
+};
