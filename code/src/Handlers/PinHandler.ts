@@ -9,6 +9,7 @@ import CommandManager from '../Managers/CommandManager';
 import LogService from '../Services/LogService';
 import { LogType } from '../Enums/LogType';
 import Guild from '../Objects/Guild';
+import DiscordService from '../Services/DiscordService';
 
 export default class PinHandler {
 
@@ -20,6 +21,10 @@ export default class PinHandler {
     }
 
     public static AddPinReaction(messageInfo: IMessageInfo, guild: Guild) {
+        if (!DiscordService.CheckPermission(messageInfo, 'ADD_REACTIONS')) {
+            return;
+        }
+
         if (messageInfo.message == null) {
             return;
         }
@@ -29,6 +34,10 @@ export default class PinHandler {
     }
 
     public static async PinMessage(messageInfo: IMessageInfo, guild: Guild) {
+        if (!DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'pin your message')) {
+            return;
+        }
+
         const pinned = await (<TextChannel>messageInfo.channel).messages.fetchPinned(true);
         const pinnedArray = pinned.array();
         if (pinnedArray.length >= SettingsConstants.MAX_PINS) {
@@ -57,6 +66,10 @@ export default class PinHandler {
     }
 
     private static async OnUnpin(messageInfo: IMessageInfo, guild: Guild) {
+        if (!DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'unpin your message')) {
+            return;
+        }
+
         const pinned = await (<TextChannel>messageInfo.channel).messages.fetchPinned(true);
         const pinnedArray = pinned.array();
         if (pinnedArray.length > 0) {

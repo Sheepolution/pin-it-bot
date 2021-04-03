@@ -1,4 +1,4 @@
-import { Message, User } from 'discord.js';
+import { Message, PermissionResolvable, User } from 'discord.js';
 import IMessageInfo from '../Interfaces/IMessageInfo';
 import RegexConstants from '../Constants/RegexConstants';
 
@@ -67,5 +67,17 @@ export default class DiscordUtils {
         }
 
         return ret;
+    }
+
+    public static GetUserFriendlyPermissionText(permission: PermissionResolvable) {
+        if (typeof permission != 'string') {
+            throw new TypeError('The permission is not of type string');
+        }
+
+        switch (permission) {
+            case 'EMBED_LINKS': return 'send embedded messages';
+        }
+
+        return permission.toLowerCase().replaceAll('_', ' ');
     }
 }

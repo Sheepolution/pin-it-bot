@@ -6,6 +6,12 @@ import EmojiConstants from '../Constants/EmojiConstants';
 export default class MessageService {
 
     public static async ReplyMessage(messageInfo: IMessageInfo, text: string, good?: boolean, mention?: boolean, embed?: MessageEmbed) {
+        if (embed) {
+            if (!DiscordService.CheckPermission(messageInfo, 'EMBED_LINKS')) {
+                return;
+            }
+        }
+
         if (good != null) {
             text = (good ? EmojiConstants.STATUS.GOOD : EmojiConstants.STATUS.BAD) + ' ' + text;
         }
@@ -18,10 +24,10 @@ export default class MessageService {
     }
 
     public static async ReplyEmbed(messageInfo: IMessageInfo, embed: MessageEmbed, text?: string) {
-        return DiscordService.SendEmbed(messageInfo.channel, embed, text);
-    }
+        if (!DiscordService.CheckPermission(messageInfo, 'EMBED_LINKS')) {
+            return;
+        }
 
-    private static async SendMessage(channel: TextChannel, text: string, embed?: MessageEmbed) {
-        return await DiscordService.SendMessage(channel, text, embed);
+        return DiscordService.SendEmbed(messageInfo.channel, embed, text);
     }
 }

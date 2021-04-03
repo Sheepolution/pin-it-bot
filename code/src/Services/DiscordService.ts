@@ -1,5 +1,7 @@
-import { Channel, Client, Guild, GuildMember, MessageEmbed, TextChannel, User } from 'discord.js';
+import { Channel, Client, Guild, GuildMember, MessageEmbed, PermissionResolvable, TextChannel, User } from 'discord.js';
+import IMessageInfo from '../Interfaces/IMessageInfo';
 import DiscordUtils from '../Utils/DiscordUtils';
+import MessageService from './MessageService';
 
 export default class DiscordService {
 
@@ -119,6 +121,20 @@ export default class DiscordService {
 
     public static IsMemberMod(member: GuildMember) {
         return member.hasPermission('MANAGE_CHANNELS') || member.hasPermission('MANAGE_MESSAGES') || member.hasPermission('MANAGE_ROLES');
+    }
+
+    public static async CheckPermission(messageInfo: IMessageInfo, permission: PermissionResolvable, action?: string, sendMessage: boolean = true) {
+        const botMember = await DiscordService.FindMemberById(this.client.user.id, messageInfo.guild);
+        const permissions = botMember.permissionsIn(messageInfo.channel);
+        if (permissions.has(permission)) {
+            return true;
+        }
+
+        if (sendMessage) {
+            MessageService.ReplyMessage(messageInfo, `I don't have permission to ${DiscordUtils.GetUserFriendlyPermissionText(permission)}${action?.isFilled() ? `, so I can't ${action}.` : '.'}`, false);
+        }
+
+        return false;
     }
 
     public static async SendEmbed(channel: Channel, embed: MessageEmbed, content?: string) {
