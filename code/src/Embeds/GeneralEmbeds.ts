@@ -70,18 +70,18 @@ Go to the support server - [Link](${SettingsConstants.SUPPORT_SERVER_INVITE_URL}
             .setTitle('Donate')
             .setDescription(`Thank you for using ${SettingsConstants.BOT_NAME}!
 A small donation would be much appreciated!
-With donations I will be able to pay for the server costs and financially support other projects. 
+With your support I will be able to pay for the server costs and financially support other projects. 
 You can donate using the methods below:
+
+**Paypal** - [Link](${SettingsConstants.DONATION_PATREON_URL})
 
 **Paypal** - [Link](${SettingsConstants.DONATION_PAYPAL_URL})
 
 **Ko-fi** - [Link](${SettingsConstants.DONATION_KOFI_URL})
 
-**Bitcoin**
-${SettingsConstants.DONATION_BITCOIN_ADDRESS}
+**Buy me a coffee** - [Link](${SettingsConstants.DONATION_BMAC_URL})
 
-**Gulden**
-${SettingsConstants.DONATION_GULDEN_ADDRESS}`)
+You can also help me by [voting for the bot](https://top.gg/bot/${SettingsConstants.BOT_ID}) and write a review.`)
             .setFooter(`Thank you ${EmojiConstants.HEART}`);
 
         return embed;

@@ -5,10 +5,10 @@ export default class SettingsConstants {
     public static readonly BOT_INVITE_URL = process.env.BOT_INVITE_URL || '';
     public static readonly SUPPORT_SERVER_INVITE_URL = process.env.SUPPORT_SERVER_INVITE_URL || '';
 
+    public static readonly DONATION_PATREON_URL = 'https://www.patreon.com/sheepolution';
     public static readonly DONATION_PAYPAL_URL = 'https://www.paypal.com/donate?hosted_button_id=TZFSRNXR9FEEE';
     public static readonly DONATION_KOFI_URL = 'https://ko-fi.com/sheepolution';
-    public static readonly DONATION_BITCOIN_ADDRESS = 'bc1q306yynudpa5dd06ruhdfwft20d7y7e2rmd3pnyvvtzxxrxsjhxjsjjvl0v';
-    public static readonly DONATION_GULDEN_ADDRESS = 'GKeikV3DUCzoG3RQuH6USV7UA2sxZhFdz5';
+    public static readonly DONATION_BMAC_URL = 'https://buymeacoffee.com/sheepolution';
 
     public static readonly COLORS = {
         BAD: '#ff0000',
