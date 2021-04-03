@@ -20,8 +20,8 @@ export default class PinHandler {
         }
     }
 
-    public static AddPinReaction(messageInfo: IMessageInfo, guild: Guild) {
-        if (!DiscordService.CheckPermission(messageInfo, 'ADD_REACTIONS')) {
+    public static async AddPinReaction(messageInfo: IMessageInfo, guild: Guild) {
+        if (!await DiscordService.CheckPermission(messageInfo, 'ADD_REACTIONS')) {
             return;
         }
 
@@ -34,7 +34,7 @@ export default class PinHandler {
     }
 
     public static async PinMessage(messageInfo: IMessageInfo, guild: Guild) {
-        if (!DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'pin your message')) {
+        if (!await DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'pin your message')) {
             return;
         }
 
@@ -66,7 +66,7 @@ export default class PinHandler {
     }
 
     private static async OnUnpin(messageInfo: IMessageInfo, guild: Guild) {
-        if (!DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'unpin your message')) {
+        if (!await DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'unpin your message')) {
             return;
         }
 
