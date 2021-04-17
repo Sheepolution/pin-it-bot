@@ -18,8 +18,19 @@ export default class BotManager {
 
     public static OnReady() {
         console.log(`${SettingsConstants.BOT_NAME}: Connected`);
+        BotManager.CreateActivityInterval();
         CacheManager.CreateTimeoutInterval();
-        Discord.GetClient().user.setActivity(`${SettingsConstants.DEFAULT_PREFIX}help`, { type: 'WATCHING' });
+    }
+
+    public static CreateActivityInterval() {
+        this.SetActivity();
+        setInterval(() => {
+            this.SetActivity();
+        }, Utils.GetHoursInMiliSeconds(4));
+    }
+
+    public static SetActivity() {
+        Discord.GetClient().user?.setActivity(`${SettingsConstants.DEFAULT_PREFIX}help`, { type: 'WATCHING' });
     }
 
     public static async OnMessage(message: Message) {
