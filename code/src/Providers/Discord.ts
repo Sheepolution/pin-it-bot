@@ -37,10 +37,10 @@ export default class Discord {
         DiscordService.SetClient(this.client);
 
         this.client.once('ready', () => { Discord.EventReady(); });
-        this.client.on('message', (message) => { Discord.EventMessage(message); });
-        this.client.on('messageReactionAdd', async (reaction, user) => { await Discord.EventReactionAdd(reaction, <User>user); });
         this.client.on('guildCreate', (guild) => { Discord.EventGuildCreate(guild); });
         this.client.on('guildDelete', (guild) => { Discord.EventGuildDelete(guild); });
+        this.client.on('message', (message) => { Discord.EventMessage(message); });
+        this.client.on('messageReactionAdd', async (reaction, user) => { await Discord.EventReactionAdd(reaction, <User>user); });
         this.client.login(process.env.TOKEN);
     }
 
@@ -54,30 +54,6 @@ export default class Discord {
         }
 
         this.eventReadyCallback();
-    }
-
-    private static EventMessage(message: Message) {
-        if (this.eventMessageCallback == null) {
-            return;
-        }
-
-        if (message.author.bot) {
-            return;
-        }
-
-        this.eventMessageCallback(message);
-    }
-
-    private static EventReactionAdd(reaction: MessageReaction, user: User) {
-        if (this.eventReactionAddCallback == null) {
-            return;
-        }
-
-        if (user.bot) {
-            return;
-        }
-
-        this.eventReactionAddCallback(reaction, user);
     }
 
     private static EventGuildCreate(guild: Guild) {
@@ -94,5 +70,37 @@ export default class Discord {
         }
 
         this.eventGuildDelete(guild);
+    }
+
+    private static EventMessage(message: Message) {
+        if (this.eventMessageCallback == null) {
+            return;
+        }
+
+        if (message.author.bot) {
+            return;
+        }
+
+        this.eventMessageCallback(message);
+    }
+
+    private static async EventReactionAdd(reaction: MessageReaction, user: User) {
+        if (this.eventReactionAddCallback == null) {
+            return;
+        }
+
+        if (reaction.partial) {
+            try {
+                await reaction.fetch();
+            } catch (error) {
+                return;
+            }
+        }
+
+        if (user.bot) {
+            return;
+        }
+
+        this.eventReactionAddCallback(reaction, user);
     }
 }
