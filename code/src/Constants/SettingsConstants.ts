@@ -1,6 +1,7 @@
 export default class SettingsConstants {
     public static readonly BOT_ID = process.env.BOT_ID || '';
     public static readonly MASTER_ID = process.env.MASTER_ID || '';
+    public static readonly LOG_CHANNEL_ID = process.env.LOG_CHANNEL_ID || '';
 
     public static readonly BOT_INVITE_URL = process.env.BOT_INVITE_URL || '';
     public static readonly SUPPORT_SERVER_INVITE_URL = process.env.SUPPORT_SERVER_INVITE_URL || '';
