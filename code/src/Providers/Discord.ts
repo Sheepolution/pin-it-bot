@@ -69,6 +69,10 @@ export default class Discord {
     }
 
     private static EventReactionAdd(reaction: MessageReaction, user: User) {
+        if (this.eventReactionAddCallback == null) {
+            return;
+        }
+
         if (user.bot) {
             return;
         }
@@ -77,7 +81,7 @@ export default class Discord {
     }
 
     private static EventGuildCreate(guild: Guild) {
-        if (this.eventMessageCallback == null) {
+        if (this.eventGuildCreate == null) {
             return;
         }
 
@@ -85,7 +89,7 @@ export default class Discord {
     }
 
     private static EventGuildDelete(guild: Guild) {
-        if (this.eventMessageCallback == null) {
+        if (this.eventGuildDelete == null) {
             return;
         }
 
