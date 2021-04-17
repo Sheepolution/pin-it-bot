@@ -7,7 +7,7 @@ const { Model } = require('objection');
 export default class LogModel extends Model {
 
     static get tableName() {
-        return 'logs';
+        return 'log';
     }
 
     public static async New(guild: Guild, logType?: LogType) {

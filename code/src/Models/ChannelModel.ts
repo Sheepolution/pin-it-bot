@@ -6,7 +6,7 @@ const { Model } = require('objection');
 export default class ChannelModel extends Model {
 
     static get tableName() {
-        return 'channels';
+        return 'channel';
     }
 
     public static async New(discordId: string, guild: Guild) {
