@@ -9,8 +9,7 @@ export default class ReactionManager {
     public static AddMessage(message: Message, method: Function, messageInfo?: IMessageInfo, values?: any, duration: number = 5) {
         const id = message.id;
         const timeout = setTimeout(() => {
-            message.reactions.removeAll().catch();
-            delete ReactionManager.messages[id];
+            ReactionManager.OnTimeout(message);
         }, Utils.GetMinutesInMiliSeconds(duration));
 
         ReactionManager.messages[id] = { message: message, messageInfo: messageInfo, timeout: timeout, values: values, duration: duration, method: method };
@@ -29,10 +28,16 @@ export default class ReactionManager {
         clearTimeout(obj.timeout);
 
         obj.timeout = setTimeout(() => {
-            obj.message.reactions.removeAll().catch();
-            delete ReactionManager.messages[obj.message.id];
+            ReactionManager.OnTimeout(obj.message);
         }, Utils.GetMinutesInMiliSeconds(obj.duration));
 
         obj.method(obj, reaction);
+    }
+
+    public static OnTimeout(message: Message) {
+        if (!message.deleted) {
+            message.reactions.removeAll().catch();
+        }
+        delete ReactionManager.messages[message.id];
     }
 }
