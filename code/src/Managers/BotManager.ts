@@ -11,6 +11,8 @@ import MessageHandler from '../Handlers/MessageHandler';
 import SettingsConstants from '../Constants/SettingsConstants';
 import ReactionManager from './ReactionManager';
 import Discord from '../Providers/Discord';
+import LogService from '../Services/LogService';
+import { LogType } from '../Enums/LogType';
 
 export default class BotManager {
 
@@ -84,11 +86,13 @@ export default class BotManager {
     public static async OnAddedToGuild(discordGuild: DiscordGuild) {
         const guild = await GuildRepository.GetOrCreateByDiscordId(discordGuild.id);
         await guild.OnJoin();
+        LogService.Log(LogType.GuildJoined, guild);
     }
 
     public static async OnKickedFromGuild(discordGuild: DiscordGuild) {
         const guild = await GuildRepository.GetOrCreateByDiscordId(discordGuild.id);
         await guild.OnLeave();
+        LogService.Log(LogType.GuildLeft, guild);
     }
 
     public static async ClearPrefixCache(messageInfo: IMessageInfo) {
