@@ -78,6 +78,10 @@ export default class Discord {
         }
 
         if (message.author.bot) {
+            if (message.system && message.type == 'PINS_ADD') {
+                message.delete();
+            }
+
             return;
         }
 
