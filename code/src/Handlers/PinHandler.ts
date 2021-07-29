@@ -15,7 +15,11 @@ export default class PinHandler {
 
     public static async OnReaction(obj: any, reaction: MessageReaction) {
         if (reaction.emoji.name == EmojiConstants.PIN) {
-            obj.messageInfo.message.reactions.removeAll();
+            if (!await DiscordService.CheckPermission(obj.messageInfo, 'MANAGE_MESSAGES', 'unpin your message', false)) {
+                return;
+            }
+
+            obj.messageInfo.message.reactions.cache.find((r: MessageReaction) => r.emoji.name == EmojiConstants.PIN).remove();
             await PinHandler.PinMessage(obj.messageInfo, obj.values.guild);
         }
     }

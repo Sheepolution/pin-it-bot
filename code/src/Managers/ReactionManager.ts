@@ -1,14 +1,20 @@
 import IMessageInfo from '../Interfaces/IMessageInfo';
 import { MessageReaction, Message, User } from 'discord.js';
 import { Utils } from '../Utils/Utils';
+import EmojiConstants from '../Constants/EmojiConstants';
+import DiscordService from '../Services/DiscordService';
 
 export default class ReactionManager {
 
     private static messages: any = {};
 
-    public static AddMessage(message: Message, method: Function, messageInfo?: IMessageInfo, values?: any, duration: number = 5) {
+    public static AddMessage(message: Message, method: Function, messageInfo: IMessageInfo, values?: any, duration: number = 5) {
         const id = message.id;
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout(async () => {
+            if (!await DiscordService.CheckPermission(messageInfo, 'MANAGE_MESSAGES', 'unpin your message', false)) {
+                return;
+            }
+
             ReactionManager.OnTimeout(message);
         }, Utils.GetMinutesInMiliSeconds(duration));
 
@@ -27,7 +33,11 @@ export default class ReactionManager {
 
         clearTimeout(obj.timeout);
 
-        obj.timeout = setTimeout(() => {
+        obj.timeout = setTimeout(async () => {
+            if (!await DiscordService.CheckPermission(obj.messageInfo, 'MANAGE_MESSAGES', 'unpin your message', false)) {
+                return;
+            }
+
             ReactionManager.OnTimeout(obj.message);
         }, Utils.GetMinutesInMiliSeconds(obj.duration));
 
@@ -36,8 +46,9 @@ export default class ReactionManager {
 
     public static OnTimeout(message: Message) {
         if (!message.deleted) {
-            message.reactions.removeAll().catch();
+            message.reactions.cache.find(r => r.emoji.name == EmojiConstants.PIN).remove();
         }
+
         delete ReactionManager.messages[message.id];
     }
 }
